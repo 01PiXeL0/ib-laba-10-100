@@ -1,38 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Career Guidance Experience
+
+A Next.js (App Router) experience for interactive career selection. Users проходят скринер, отвечают на углублённые и ситуационные вопросы, видят живые рекомендации и сохраняют сессию в Supabase вместе со snapshot признаков.
+
+## Что внутри
+
+- Клиентский конструктор: профиль, области интересов, форматы работы, ценности (слайдеры) и свободный ввод.
+- Живой блок рекомендаций с объяснениями и навыками; гибридный скоринг (правила + веса + эмбеддинги).
+- Секция диалога: готовые вопросы для скринера, углубления и ситуаций.
+- Блок админки: таблицы Supabase, RLS по умолчанию, REST-доступ к каталогам профессий/правил.
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Copy `.env.local.example` to `.env.local` and fill in your Supabase project keys (Project Settings → API in Supabase):
+
+```bash
+cp .env.local.example .env.local
+```
+
+Then edit `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# Only used on the server (API routes); do NOT expose elsewhere
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+3. Apply the Supabase schema (one-time):
+
+   - Open the Supabase Dashboard → SQL editor → paste `supabase/schema.sql` → **Run**. If you prefer CLI, run `psql "<supabase-connection-string>" -f supabase/schema.sql`.
+   - Verify tables (Sessions/Answers/Profiles/Jobs/Rules/Scores/Questions/Users) appeared in Database → Tables.
+
+4. Run the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to explore the builder and chat-style flows.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase setup (detailed)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1) **Create `.env.local` in the repo root** (e.g., `cp .env.local.example .env.local`) using keys from Supabase → Project Settings → API. Keep the service role key server-only:
 
-## Learn More
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-public-api-key>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+```
 
-To learn more about Next.js, take a look at the following resources:
+2) **Apply the schema** (if not already):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Dashboard → SQL → paste `supabase/schema.sql` → Run.
+- Or from a terminal: `psql "postgresql://postgres:<password>@db.<project>.supabase.co:5432/postgres" -f supabase/schema.sql` (use the connection string from Project Settings → Database → Connection string → Psql).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3) **Check RLS**: after applying the SQL, RLS is enabled on all tables; anon can insert into `sessions`/`answers`, service role can do everything. If you want authenticated reads for admin UI, use the provided policies on `questions/jobs/rules/scores`.
 
-## Deploy on Vercel
+4) **Optional helpers**:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Create an Edge Function or RPC that updates `profiles.emb_vector` when you capture free-text answers (embedding size is 1536, cosine index already exists).
+- Seed catalogs via SQL inserts into `questions`, `jobs`, `rules` to match your domain.
 
+## API
+
+`POST /api/sessions` accepts a session payload (profile, screening, motivations, featureSnapshot) and persists rows into `sessions` and `answers`. The handler uses the Supabase REST API with your `NEXT_PUBLIC_SUPABASE_URL` and keys; set `SUPABASE_SERVICE_ROLE_KEY` if you want to bypass RLS via the service role.
+
+## Deployment
+
+The app is production-ready on any Next.js host (Vercel, etc.). Ensure env vars are configured and the Supabase schema is applied before deploying.
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 ## Supabase configuration

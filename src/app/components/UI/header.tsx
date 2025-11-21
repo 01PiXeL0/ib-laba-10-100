@@ -2,6 +2,10 @@
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from "@heroui/react";
 
 const links = [
+  { label: "Рабочее место", href: "#workspace" },
+  { label: "Диалог", href: "#dialog" },
+  { label: "Скоринг", href: "#engine" },
+  { label: "Админ", href: "#data" },
   { label: "Логика", href: "#flow" },
   { label: "Рекомендации", href: "#professions" },
   { label: "Админ", href: "#admin" },
@@ -29,6 +33,8 @@ export default function Header() {
           </Link>
         </NavbarItem>
         <NavbarItem>
+          <Button as={Link} href="#cta" color="primary" className="font-semibold">
+            Развернуть сейчас
           <Button as={Link} href="#professions" color="primary" className="font-semibold">
             Смотреть прототип
           </Button>
