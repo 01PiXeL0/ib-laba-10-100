@@ -10,11 +10,18 @@ A Next.js (App Router) experience for interactive career selection. The app guid
 npm install
 ```
 
-2. Create a `.env.local` file with your Supabase project keys (Project Settings → API in Supabase):
+2. Copy `.env.local.example` to `.env.local` and fill in your Supabase project keys (Project Settings → API in Supabase):
+
+```bash
+cp .env.local.example .env.local
+```
+
+Then edit `.env.local`:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# Only used on the server (API routes); do NOT expose elsewhere
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
@@ -33,7 +40,7 @@ Open [http://localhost:3000](http://localhost:3000) to explore the builder and c
 
 ## Supabase setup (detailed)
 
-1) **Create `.env.local` in the repo root** using keys from Supabase → Project Settings → API:
+1) **Create `.env.local` in the repo root** (e.g., `cp .env.local.example .env.local`) using keys from Supabase → Project Settings → API. Keep the service role key server-only:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
