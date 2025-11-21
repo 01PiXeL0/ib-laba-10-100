@@ -6,6 +6,9 @@ const links = [
   { label: "Диалог", href: "#dialog" },
   { label: "Скоринг", href: "#engine" },
   { label: "Админ", href: "#data" },
+  { label: "Логика", href: "#flow" },
+  { label: "Рекомендации", href: "#professions" },
+  { label: "Админ", href: "#admin" },
 ];
 
 export default function Header() {
@@ -32,6 +35,8 @@ export default function Header() {
         <NavbarItem>
           <Button as={Link} href="#cta" color="primary" className="font-semibold">
             Развернуть сейчас
+          <Button as={Link} href="#professions" color="primary" className="font-semibold">
+            Смотреть прототип
           </Button>
         </NavbarItem>
       </NavbarContent>

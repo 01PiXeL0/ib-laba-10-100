@@ -74,3 +74,21 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 ## Deployment
 
 The app is production-ready on any Next.js host (Vercel, etc.). Ensure env vars are configured and the Supabase schema is applied before deploying.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Supabase configuration
+
+The project is preconfigured to talk to the provided Supabase instance.
+
+1. Copy `.env.local.example` to `.env.local` and adjust the values if you ever rotate the keys.
+2. Use the helper exported from `src/lib/supabaseClient.ts` to make authenticated REST requests:
+
+```ts
+import { supabase } from "@/lib/supabaseClient";
+
+const notes = await supabase.fetch<{ id: number; title: string }[]>({
+  path: "/rest/v1/notes?select=*",
+});
+```
+
+By default the client uses the public anon key. Pass `auth: "service"` in the fetch options when you need elevated privileges.
