@@ -1,20 +1,39 @@
 "use client";
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from "@heroui/react";
 
+const links = [
+  { label: "Рабочее место", href: "#workspace" },
+  { label: "Диалог", href: "#dialog" },
+  { label: "Скоринг", href: "#engine" },
+  { label: "Админ", href: "#data" },
+];
+
 export default function Header() {
   return (
-    <Navbar>
+    <Navbar maxWidth="xl" className="bg-white/70 backdrop-blur dark:bg-black/50">
       <NavbarBrand>
-        <p className="text-2xl font-bold">DEVBASICS</p>
+        <p className="text-2xl font-bold tracking-tight">DEVBASICS</p>
       </NavbarBrand>
-      <NavbarContent justify="center" className="hidden sm:flex gap-4">
-        <NavbarItem><Link href="#">Features</Link></NavbarItem>
-        <NavbarItem isActive><Link href="#">Customers</Link></NavbarItem>
-        <NavbarItem><Link href="#">Integrations</Link></NavbarItem>
+      <NavbarContent justify="center" className="hidden gap-4 sm:flex">
+        {links.map((link) => (
+          <NavbarItem key={link.href}>
+            <Link className="text-sm font-medium" href={link.href} color="foreground">
+              {link.label}
+            </Link>
+          </NavbarItem>
+        ))}
       </NavbarContent>
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex"><Link href="#">Login</Link></NavbarItem>
-        <NavbarItem><Button as={Link} href="#" color="primary">Sign Up</Button></NavbarItem>
+      <NavbarContent justify="end" className="gap-3">
+        <NavbarItem className="hidden sm:flex">
+          <Link href="mailto:team@devbasics.ai" className="text-sm font-medium">
+            Связаться
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Button as={Link} href="#cta" color="primary" className="font-semibold">
+            Развернуть сейчас
+          </Button>
+        </NavbarItem>
       </NavbarContent>
     </Navbar>
   );
