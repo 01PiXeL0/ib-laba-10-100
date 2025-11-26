@@ -371,12 +371,15 @@ export default function Home() {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-zinc-200">
               <p className="font-semibold text-white">Мини-дашборд подключений</p>
               <ul className="mt-2 space-y-1">
-                <li className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-400" />Supabase REST
-                  и Auth — включены</li>
-                <li className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-blue-400" />pgvector для эмбеддингов
-                  — примените миграцию из supabase/schema.sql</li>
-                <li className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-400" />Neon/Railway — можно
-                  использовать как внешний Postgres, сменив ENV</li>
+                <li className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />Supabase REST и Auth — включены
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-blue-400" />pgvector для эмбеддингов — примените миграцию из supabase/schema.sql
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-amber-400" />Neon/Railway — можно использовать как внешний Postgres, сменив ENV
+                </li>
               </ul>
             </div>
           </div>
