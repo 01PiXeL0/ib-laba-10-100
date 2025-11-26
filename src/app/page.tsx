@@ -146,79 +146,6 @@ function scoreRoles(selectedAreas: string[], values: Record<string, number>) {
     .sort((a, b) => b.score - a.score)
     .slice(0, 4);
 }
-import { Button, Card, CardBody } from "@heroui/react";
-
-const quickScreen = [
-  "Области интересов (IT, медицина, финансы, дизайн и др.)",
-  "Работа с людьми, данными, оборудованием или идеями",
-  "Предпочтения по формату работы и темпу (офис/гибрид/удалённо)",
-  "Готовность учиться и уровень гибкости к переменам",
-  "Ограничения и важные условия (география, здоровье, график)",
-];
-
-const deepDive = [
-  "RIASEC/Big Five стилистика: склонность к исследованиям, креативу, процессам",
-  "Ситуационные кейсы про дедлайны, конфликты и быстрое прототипирование",
-  "Шкалы ценностей: стабильность, доход, социальная польза, автономия",
-  "Свободный ввод с NLP-анализом для выявления скрытых интересов",
-  "Практические навыки: код, данные, дизайн, преподавание, менеджмент",
-];
-
-const professions = [
-  {
-    title: "Data Scientist / ML Engineer",
-    score: "92% совпадения",
-    reasons: ["любите аналитику и данные", "готовность к длительному обучению", "интерес к AI-проектам"],
-    steps: "SQL → Python/ML → pet-проекты → MLOps базис",
-  },
-  {
-    title: "UX/UI Дизайнер",
-    score: "76% совпадения",
-    reasons: ["высокая креативность", "желание улучшать пользовательский опыт", "готовность учить других"],
-    steps: "Figma → исследования → UI-киты → портфолио кейсы",
-  },
-  {
-    title: "Инженер по устойчивой энергетике",
-    score: "68% совпадения",
-    reasons: ["ценность пользы обществу", "интерес к технологиям", "готовность работать в полевых условиях"],
-    steps: "основы энергетики → CAD/SCADA → стажировка → сертификация",
-  },
-];
-
-const dataModel = [
-  { title: "Профиль сессии", detail: "вопросы, ответы, быстрые снапшоты резюме, прогресс" },
-  { title: "База профессий", detail: "id, область, навыки, веса, требования, ростовые пути" },
-  { title: "Правила и веса", detail: "IF–THEN фильтры + настраиваемые коэффициенты" },
-  { title: "Векторный слой", detail: "эмбеддинги ответов для поиска по навыкам и интересам" },
-  { title: "Оценки и объяснения", detail: "score = α*rules + β*emb + γ*LLM с причинами выбора" },
-];
-
-const steps = [
-  {
-    title: "Приветствие и скринер",
-    text: "5–8 быстрых вопросов, чтобы выбрать области и отсеять заведомо неподходящее.",
-  },
-  {
-    title: "Углублённый блок",
-    text: "15–25 вопросов по выбранным направлениям: ценности, ситуации, навыки, свободный ввод.",
-  },
-  {
-    title: "Скоринг и объяснения",
-    text: "Гибридная модель: правила, веса, векторный матч + LLM-подсказки.",
-  },
-  {
-    title: "Результат и путь",
-    text: "Топ-5 профессий с причинами выбора, шагами развития и мини-заданиями.",
-  },
-];
-
-const adminFeatures = [
-  "Редактор базы профессий и весов (добавлять новые роли и навыки)",
-  "Сценарии вопросов по областям, версии и A/B-тесты",
-  "Экспорт результатов в PDF/CSV и контроль приватности (удалить профиль)",
-  "Подключение внешних LLM или локальной модели",
-  "Метрики качества: оценка релевантности, время прохождения, конверсия",
-];
 
 export default function Home() {
   const [profile, setProfile] = useState({ name: "", email: "", ageGroup: "", location: "", education: "" });
@@ -486,10 +413,11 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardBody className="space-y-3 text-sm text-zinc-200">
-              <p className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white">
-                Модальное окно открывается из хедера или отсюда; все запросы идут на `/api/auth/{register|login}` и
-                проксируются в Supabase Auth. Сервисный ключ хранится только на сервере, клиент использует публичный anon key.
-              </p>
+                <p className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white">
+                  Модальное окно открывается из хедера или отсюда; все запросы идут на `/api/auth/register` и
+                  `/api/auth/login`, а затем проксируются в Supabase Auth. Сервисный ключ хранится только на сервере,
+                  клиент использует публичный anon key.
+                </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="rounded-lg border border-white/10 bg-black/30 px-3 py-2">Email → Supabase Auth</div>
                 <div className="rounded-lg border border-white/10 bg-black/30 px-3 py-2">Password → RLS сессии</div>
@@ -952,7 +880,8 @@ export default function Home() {
                     onChange={(e) => setAuthPassword(e.target.value)}
                   />
                   <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-zinc-200">
-                    Все запросы идут на `/api/auth/{register|login}`; сервисный ключ хранится на сервере. После входа можно писать админку на REST `/rest/v1/*` с ключом service role.
+                    Все запросы идут на `/api/auth/register` и `/api/auth/login`; сервисный ключ хранится на сервере. После
+                    входа можно писать админку на REST `/rest/v1/*` с ключом service role.
                   </div>
                 </ModalBody>
                 <ModalFooter>

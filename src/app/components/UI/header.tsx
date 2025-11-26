@@ -1,11 +1,12 @@
 "use client";
-
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button, Chip } from "@heroui/react";
 
 const links = [
-  { label: "Логика", href: "#flow" },
-  { label: "Рекомендации", href: "#professions" },
-  { label: "Админ", href: "#admin" },
+  { label: "Рабочее место", href: "#workspace" },
+  { label: "Диалог", href: "#dialog" },
+  { label: "Скоринг", href: "#engine" },
+  { label: "Админ", href: "#data" },
+  { label: "Аккаунт", href: "#account" },
 ];
 
 export default function Header() {
@@ -23,7 +24,6 @@ export default function Header() {
           <span className="text-xs uppercase text-zinc-500 dark:text-zinc-400">Career OS</span>
         </div>
       </NavbarBrand>
-
       <NavbarContent justify="center" className="hidden gap-4 sm:flex">
         {links.map((link) => (
           <NavbarItem key={link.href}>
@@ -33,14 +33,12 @@ export default function Header() {
           </NavbarItem>
         ))}
       </NavbarContent>
-
       <NavbarContent justify="end" className="gap-3">
         <NavbarItem className="hidden sm:flex">
           <Chip size="sm" color="primary" variant="flat" className="font-semibold uppercase tracking-wide">
             Live on Supabase
           </Chip>
         </NavbarItem>
-
         <NavbarItem>
           <Button
             color="primary"
@@ -52,18 +50,6 @@ export default function Header() {
             }}
           >
             Войти / Регистрация
-          </Button>
-        </NavbarItem>
-
-        <NavbarItem>
-          <Link href="mailto:team@devbasics.ai" className="text-sm font-medium">
-            Связаться
-          </Link>
-        </NavbarItem>
-
-        <NavbarItem>
-          <Button as={Link} href="#professions" color="primary" className="font-semibold">
-            Смотреть прототип
           </Button>
         </NavbarItem>
       </NavbarContent>
