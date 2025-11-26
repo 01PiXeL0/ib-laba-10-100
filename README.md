@@ -8,6 +8,7 @@ A Next.js (App Router) experience for interactive career selection. Users про
 - Живой блок рекомендаций с объяснениями и навыками; гибридный скоринг (правила + веса + эмбеддинги).
 - Секция диалога: готовые вопросы для скринера, углубления и ситуаций.
 - Блок админки: таблицы Supabase, RLS по умолчанию, REST-доступ к каталогам профессий/правил.
+- Аккаунт-секция: регистрация/вход через Supabase Auth с серверными API `/api/auth/register` и `/api/auth/login`.
 
 ## Getting Started
 
@@ -66,6 +67,17 @@ SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 
 - Create an Edge Function or RPC that updates `profiles.emb_vector` when you capture free-text answers (embedding size is 1536, cosine index already exists).
 - Seed catalogs via SQL inserts into `questions`, `jobs`, `rules` to match your domain.
+
+5) **База данных по умолчанию**: оптимальный вариант — Supabase (PostgreSQL + pgvector + Auth в одном проекте). Если нужно
+   разнести хранение и аутентификацию, можно использовать Neon/Railway Postgres с расширением `vector`, а Supabase оставить
+   только для Auth — достаточно указать их connection string в `.env.local`.
+
+## Auth endpoints
+
+- `POST /api/auth/register` — принимает `{ email, password, name? }`, вызывает Supabase Auth signup и возвращает сообщение о
+  регистрации. Обработка письма-подтверждения остаётся на стороне Supabase.
+- `POST /api/auth/login` — принимает `{ email, password }`, проксирует вход через Supabase Auth и возвращает access token/meta
+  из ответа Supabase.
 
 ## API
 

@@ -162,6 +162,13 @@ export default function Home() {
   const [resultStatus, setResultStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [authMode, setAuthMode] = useState<"register" | "login">("register");
+  const [authEmail, setAuthEmail] = useState("demo@devbasics.ai");
+  const [authPassword, setAuthPassword] = useState("secure-demo-pass");
+  const [authName, setAuthName] = useState("Demo User");
+  const [authStatus, setAuthStatus] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthPending, startAuthTransition] = useTransition();
 
   const recommendations = useMemo(() => scoreRoles(selectedAreas, values), [selectedAreas, values]);
 
@@ -214,6 +221,27 @@ export default function Home() {
         setResultStatus("Сессия сохранена в Supabase и готова к продолжению диалога");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ошибка");
+      }
+    });
+  };
+
+  const handleAuth = () => {
+    setAuthStatus(null);
+    setAuthError(null);
+    startAuthTransition(async () => {
+      try {
+        const response = await fetch(`/api/auth/${authMode === "register" ? "register" : "login"}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: authEmail, password: authPassword, name: authName }),
+        });
+        const json = await response.json();
+        if (!response.ok) {
+          throw new Error(json.error || "Не удалось обработать запрос");
+        }
+        setAuthStatus(json.message || "Готово");
+      } catch (err) {
+        setAuthError(err instanceof Error ? err.message : "Ошибка");
       }
     });
   };
@@ -305,6 +333,97 @@ export default function Home() {
               <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
                 Счёт формируется на основе ценностей, выбранных областей и фокуса работы. Свободный ввод усиливает подбор через
                 векторное сопоставление.
+              </div>
+            </CardBody>
+          </Card>
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-[0.9fr,1.1fr]" id="account">
+          <div className="space-y-4">
+            <Chip color="primary" variant="flat" size="sm">
+              Доступ и база
+            </Chip>
+            <h2 className="text-3xl font-bold leading-tight">Регистрация, вход и выбор базы данных</h2>
+            <p className="text-zinc-300">
+              Авторизация на Supabase запускает готовые политики RLS и привязывает сессии к пользователю. Рекомендуем
+              держать продакшн в <span className="font-semibold text-white">Supabase (PostgreSQL + pgvector)</span> для
+              векторов и правил. Лёгкий альтернативный вариант — управляемый Postgres в Neon или Railway, если хотите
+              отделить хранение от аутентификации.
+            </p>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-zinc-200">
+              <p className="font-semibold text-white">Мини-дашборд подключений</p>
+              <ul className="mt-2 space-y-1">
+                <li className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-400" />Supabase REST
+                  и Auth — включены</li>
+                <li className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-blue-400" />pgvector для эмбеддингов
+                  — примените миграцию из supabase/schema.sql</li>
+                <li className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-400" />Neon/Railway — можно
+                  использовать как внешний Postgres, сменив ENV</li>
+              </ul>
+            </div>
+          </div>
+
+          <Card shadow="sm" className="border border-white/10 bg-white/5">
+            <CardHeader className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-zinc-300">Безопасный вход</p>
+                <p className="text-lg font-semibold text-white">Email + пароль</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={authMode === "register" ? "solid" : "bordered"}
+                  color="secondary"
+                  onPress={() => setAuthMode("register")}
+                >
+                  Регистрация
+                </Button>
+                <Button
+                  size="sm"
+                  variant={authMode === "login" ? "solid" : "bordered"}
+                  color="primary"
+                  onPress={() => setAuthMode("login")}
+                >
+                  Вход
+                </Button>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-3">
+              {authMode === "register" && (
+                <Input
+                  label="Имя"
+                  placeholder="Как к вам обращаться"
+                  value={authName}
+                  onChange={(e) => setAuthName(e.target.value)}
+                />
+              )}
+              <Input
+                label="Email"
+                placeholder="you@example.com"
+                type="email"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+              />
+              <Input
+                label="Пароль"
+                placeholder="Минимум 6 символов"
+                type="password"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+              />
+              <div className="flex flex-wrap gap-3">
+                <Button color="primary" onPress={handleAuth} isDisabled={isAuthPending}>
+                  {isAuthPending ? "Отправляем..." : authMode === "register" ? "Создать аккаунт" : "Войти"}
+                </Button>
+                <Button variant="bordered" color="secondary" href="#workspace" as="a">
+                  Вернуться к сессии
+                </Button>
+              </div>
+              {authStatus && <p className="text-sm font-semibold text-emerald-400">{authStatus}</p>}
+              {authError && <p className="text-sm font-semibold text-rose-400">{authError}</p>}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-zinc-300">
+                Все запросы идут на /api/auth/{"{"}register|login{"}"}, далее в Supabase Auth с RLS. Сервисный ключ хранится
+                только на сервере, клиент использует публичный anon key.
               </div>
             </CardBody>
           </Card>

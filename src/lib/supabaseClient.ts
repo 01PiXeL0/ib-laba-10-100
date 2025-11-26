@@ -16,6 +16,29 @@ function ensureEnv() {
   if (!SUPABASE_ANON_KEY) throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not set");
 }
 
+async function supabaseAuth(path: string, body: Record<string, unknown>) {
+  ensureEnv();
+  const headers: HeadersInit = {
+    apikey: SUPABASE_ANON_KEY!,
+    Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY!}`,
+    "Content-Type": "application/json",
+  };
+
+  const response = await fetch(`${SUPABASE_URL!.replace(/\/$/, "")}/auth/v1/${path}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Auth error ${response.status}`);
+  }
+
+  return response.json();
+}
+
 async function supabaseFetch(path: string, init?: RequestInit) {
   ensureEnv();
   const url = `${SUPABASE_URL!.replace(/\/$/, "")}${path}`;
@@ -74,4 +97,12 @@ export function supabaseHeaders(jwt?: string) {
     apikey: SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY!,
     Authorization: `Bearer ${jwt || SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY!}`,
   } as HeadersInit;
+}
+
+export async function registerUser(email: string, password: string, data?: Record<string, unknown>) {
+  return supabaseAuth("signup", { email, password, data });
+}
+
+export async function loginUser(email: string, password: string) {
+  return supabaseAuth("token?grant_type=password", { email, password });
 }
