@@ -1,88 +1,76 @@
-# Career Guidance Experience
+# DEVBASICS Career OS
 
-A Next.js (App Router) experience for interactive career selection. Users проходят скринер, отвечают на углублённые и ситуационные вопросы, видят живые рекомендации и сохраняют сессию в Supabase вместе со snapshot признаков.
+Продакшн-готовый опыт профориентации на Next.js (App Router) с Supabase: скринер, углублённые вопросы, ситуационные кейсы, живые рекомендации и сохранение сессий в PostgreSQL/pgvector. Аутентификация — через Supabase Auth (email+пароль) с модальным окном регистрации/входа.
 
-## Что внутри
+## Возможности
+- Конструктор профиля: области интересов, форматы работы, ценности (слайдеры), навыки, ограничения, свободный ввод.
+- Живые рекомендации с гибридным скорингом (веса + правила + эмбеддинги) и пояснениями «почему».
+- Диалоговые блоки: скринер, углублённые и ситуационные вопросы, ценности и навыки.
+- Хранилище и админ-контура: таблицы Supabase (users/sessions/answers/profiles/jobs/rules/scores/questions) с RLS по умолчанию.
+- Модальная регистрация/вход (email+пароль) + серверные API `/api/auth/register` и `/api/auth/login`.
 
-- Клиентский конструктор: профиль, области интересов, форматы работы, ценности (слайдеры) и свободный ввод.
-- Живой блок рекомендаций с объяснениями и навыками; гибридный скоринг (правила + веса + эмбеддинги).
-- Секция диалога: готовые вопросы для скринера, углубления и ситуаций.
-- Блок админки: таблицы Supabase, RLS по умолчанию, REST-доступ к каталогам профессий/правил.
-- Аккаунт-секция: регистрация/вход через Supabase Auth с серверными API `/api/auth/register` и `/api/auth/login`.
+## Быстрый старт
+1. **Установите зависимости**
+   ```bash
+   npm install
+   ```
 
-## Getting Started
+2. **Создайте `.env.local`** (можно скопировать пример):
+   ```bash
+   cp .env.local.example .env.local
+   ```
+   Заполните ключами из Supabase → Project Settings → API:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-public-api-key>
+   SUPABASE_SERVICE_ROLE_KEY=<service-role-key> # только на сервере
+   ```
 
-1. Install dependencies:
+3. **Примените схему БД**
+   - Через Dashboard: SQL Editor → вставьте содержимое `supabase/schema.sql` → Run.
+   - Или через CLI/psql (строка подключения в Project Settings → Database → Connection string → Psql):
+     ```bash
+     psql "postgresql://postgres:<password>@db.<project>.supabase.co:5432/postgres" -f supabase/schema.sql
+     ```
+   Проверьте, что таблицы `sessions`, `answers`, `profiles`, `jobs`, `rules`, `scores`, `questions`, `users` появились, а на них включён RLS.
 
-```bash
-npm install
-```
+4. **Запустите dev-сервер**
+   ```bash
+   npm run dev
+   ```
+   Откройте [http://localhost:3000](http://localhost:3000) — хедер, конструктор, рекомендации и модальное окно входа готовы к работе.
 
-2. Copy `.env.local.example` to `.env.local` and fill in your Supabase project keys (Project Settings → API in Supabase):
+## Подробный гайд по подключению
+1) **Ключи и переменные**
+   - `NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_ANON_KEY` используются в клиенте для REST/RLS-вставок (sessions/answers).
+   - `SUPABASE_SERVICE_ROLE_KEY` нужен только API-роутам (server-side) для сервисных вызовов (signup/login, сиды, админ-операции). Никогда не публикуйте его в браузер.
 
-```bash
-cp .env.local.example .env.local
-```
+2) **RLS и политика доступа**
+   - После применения `schema.sql` включены политики: anon может писать `sessions`/`answers`; service-role — полный доступ; доменные таблицы (`jobs`, `rules`, `questions`, `scores`) открыты на чтение для аутентифицированных пользователей (можно отключить при желании).
+   - Если нужна админка, обращайтесь к REST `/rest/v1/*` с service role ключом или через серверные RPC.
 
-Then edit `.env.local`:
+3) **Аутентификация (модальное окно)**
+   - UI-триггер в хедере и в секции «Доступ и база» открывает модалку.
+   - Регистрация/вход отправляют POST на `/api/auth/register` или `/api/auth/login` с `{ email, password, name? }`, роуты проксируют запрос в Supabase Auth.
+   - При успехе Supabase создаёт пользователя в `users`; RLS автоматически связывает сессии/ответы с `user_id` (через service role вы можете проставлять связь сами, если нужно).
 
-```bash
-NEXT_PUBLIC_SUPABASE_URL=your-project-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-# Only used on the server (API routes); do NOT expose elsewhere
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
+4) **Сохранение сессии**
+   - Кнопка «Сохранить сессию» шлёт POST на `/api/sessions` с `profile`, `screening`, `motivations`, `featureSnapshot`. Эндпоинт пишет строки в `sessions` и `answers` с учётом RLS.
+   - Для векторных признаков используйте колонку `profiles.emb_vector` (pgvector установлен), можно добавить Edge Function для эмбеддингов.
 
-3. Apply the Supabase schema (one-time):
+5) **Рекомендованная БД**
+   - **Supabase** (PostgreSQL + pgvector + Auth) — основной вариант, всё в одном проекте.
+   - Альтернатива: **Neon** или **Railway** для внешнего Postgres (с расширением `vector`); Supabase можно оставить только для Auth. Просто поменяйте строки подключения в `.env.local` и примените схему в выбранной БД.
 
-   - Open the Supabase Dashboard → SQL editor → paste `supabase/schema.sql` → **Run**. If you prefer CLI, run `psql "<supabase-connection-string>" -f supabase/schema.sql`.
-   - Verify tables (Sessions/Answers/Profiles/Jobs/Rules/Scores/Questions/Users) appeared in Database → Tables.
+6) **Деплой (Vercel/др.)**
+   - Перед деплоем задайте все переменные окружения из `.env.local` в настройках хоста.
+   - Убедитесь, что схема уже применена; dev-сервер миграции не выполняет.
+   - Production можно запускать с теми же API-роутами, RLS остаётся включённой.
 
-4. Run the dev server:
+## API для интеграции
+- `POST /api/auth/register` — `{ email, password, name? }` → Supabase Auth signup.
+- `POST /api/auth/login` — `{ email, password }` → Supabase Auth sign-in (access token/metainfo в ответе Supabase).
+- `POST /api/sessions` — сохраняет профиль и ответы в `sessions`/`answers`, payload включает `profile`, `screening`, `motivations`, `featureSnapshot`.
 
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to explore the builder and chat-style flows.
-
-## Supabase setup (detailed)
-
-1) **Create `.env.local` in the repo root** (e.g., `cp .env.local.example .env.local`) using keys from Supabase → Project Settings → API. Keep the service role key server-only:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-public-api-key>
-SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
-```
-
-2) **Apply the schema** (if not already):
-
-- Dashboard → SQL → paste `supabase/schema.sql` → Run.
-- Or from a terminal: `psql "postgresql://postgres:<password>@db.<project>.supabase.co:5432/postgres" -f supabase/schema.sql` (use the connection string from Project Settings → Database → Connection string → Psql).
-
-3) **Check RLS**: after applying the SQL, RLS is enabled on all tables; anon can insert into `sessions`/`answers`, service role can do everything. If you want authenticated reads for admin UI, use the provided policies on `questions/jobs/rules/scores`.
-
-4) **Optional helpers**:
-
-- Create an Edge Function or RPC that updates `profiles.emb_vector` when you capture free-text answers (embedding size is 1536, cosine index already exists).
-- Seed catalogs via SQL inserts into `questions`, `jobs`, `rules` to match your domain.
-
-5) **База данных по умолчанию**: оптимальный вариант — Supabase (PostgreSQL + pgvector + Auth в одном проекте). Если нужно
-   разнести хранение и аутентификацию, можно использовать Neon/Railway Postgres с расширением `vector`, а Supabase оставить
-   только для Auth — достаточно указать их connection string в `.env.local`.
-
-## Auth endpoints
-
-- `POST /api/auth/register` — принимает `{ email, password, name? }`, вызывает Supabase Auth signup и возвращает сообщение о
-  регистрации. Обработка письма-подтверждения остаётся на стороне Supabase.
-- `POST /api/auth/login` — принимает `{ email, password }`, проксирует вход через Supabase Auth и возвращает access token/meta
-  из ответа Supabase.
-
-## API
-
-`POST /api/sessions` accepts a session payload (profile, screening, motivations, featureSnapshot) and persists rows into `sessions` and `answers`. The handler uses the Supabase REST API with your `NEXT_PUBLIC_SUPABASE_URL` and keys; set `SUPABASE_SERVICE_ROLE_KEY` if you want to bypass RLS via the service role.
-
-## Deployment
-
-The app is production-ready on any Next.js host (Vercel, etc.). Ensure env vars are configured and the Supabase schema is applied before deploying.
+## Линтинг и тесты
+- `npm run lint` — проверка кода (ESLint + Next.js).

@@ -9,12 +9,17 @@ import {
   CheckboxGroup,
   Chip,
   Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Radio,
   RadioGroup,
   Slider,
   Textarea,
 } from "@heroui/react";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 const areas = [
   "IT / Data / AI",
@@ -163,12 +168,25 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [authMode, setAuthMode] = useState<"register" | "login">("register");
+  const [isAuthOpen, setAuthOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState("demo@devbasics.ai");
   const [authPassword, setAuthPassword] = useState("secure-demo-pass");
   const [authName, setAuthName] = useState("Demo User");
   const [authStatus, setAuthStatus] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthPending, startAuthTransition] = useTransition();
+
+  useEffect(() => {
+    const openHandler = () => setAuthOpen(true);
+    if (typeof window !== "undefined") {
+      window.addEventListener("devbasics:open-auth", openHandler);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("devbasics:open-auth", openHandler);
+      }
+    };
+  }, []);
 
   const recommendations = useMemo(() => scoreRoles(selectedAreas, values), [selectedAreas, values]);
 
@@ -374,7 +392,10 @@ export default function Home() {
                   size="sm"
                   variant={authMode === "register" ? "solid" : "bordered"}
                   color="secondary"
-                  onPress={() => setAuthMode("register")}
+                  onPress={() => {
+                    setAuthMode("register");
+                    setAuthOpen(true);
+                  }}
                 >
                   Регистрация
                 </Button>
@@ -382,49 +403,29 @@ export default function Home() {
                   size="sm"
                   variant={authMode === "login" ? "solid" : "bordered"}
                   color="primary"
-                  onPress={() => setAuthMode("login")}
+                  onPress={() => {
+                    setAuthMode("login");
+                    setAuthOpen(true);
+                  }}
                 >
                   Вход
                 </Button>
               </div>
             </CardHeader>
-            <CardBody className="space-y-3">
-              {authMode === "register" && (
-                <Input
-                  label="Имя"
-                  placeholder="Как к вам обращаться"
-                  value={authName}
-                  onChange={(e) => setAuthName(e.target.value)}
-                />
-              )}
-              <Input
-                label="Email"
-                placeholder="you@example.com"
-                type="email"
-                value={authEmail}
-                onChange={(e) => setAuthEmail(e.target.value)}
-              />
-              <Input
-                label="Пароль"
-                placeholder="Минимум 6 символов"
-                type="password"
-                value={authPassword}
-                onChange={(e) => setAuthPassword(e.target.value)}
-              />
-              <div className="flex flex-wrap gap-3">
-                <Button color="primary" onPress={handleAuth} isDisabled={isAuthPending}>
-                  {isAuthPending ? "Отправляем..." : authMode === "register" ? "Создать аккаунт" : "Войти"}
-                </Button>
-                <Button variant="bordered" color="secondary" href="#workspace" as="a">
-                  Вернуться к сессии
-                </Button>
+            <CardBody className="space-y-3 text-sm text-zinc-200">
+              <p className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white">
+                Модальное окно открывается из хедера или отсюда; все запросы идут на `/api/auth/{register|login}` и
+                проксируются в Supabase Auth. Сервисный ключ хранится только на сервере, клиент использует публичный anon key.
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="rounded-lg border border-white/10 bg-black/30 px-3 py-2">Email → Supabase Auth</div>
+                <div className="rounded-lg border border-white/10 bg-black/30 px-3 py-2">Password → RLS сессии</div>
+                <div className="rounded-lg border border-white/10 bg-black/30 px-3 py-2">Service role → серверные вызовы</div>
+                <div className="rounded-lg border border-white/10 bg-black/30 px-3 py-2">Anon → клиентские сохранения</div>
               </div>
-              {authStatus && <p className="text-sm font-semibold text-emerald-400">{authStatus}</p>}
-              {authError && <p className="text-sm font-semibold text-rose-400">{authError}</p>}
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-zinc-300">
-                Все запросы идут на /api/auth/{"{"}register|login{"}"}, далее в Supabase Auth с RLS. Сервисный ключ хранится
-                только на сервере, клиент использует публичный anon key.
-              </div>
+              <Button color="primary" size="md" onPress={() => setAuthOpen(true)}>
+                Открыть модальное окно входа
+              </Button>
             </CardBody>
           </Card>
         </section>
@@ -827,6 +828,83 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <Modal isOpen={isAuthOpen} onOpenChange={setAuthOpen} placement="center" size="lg" backdrop="blur">
+          <ModalContent>
+            {(onClose) => (
+              <>
+                <ModalHeader className="flex flex-col gap-1">
+                  {authMode === "register" ? "Регистрация" : "Вход"}
+                  <p className="text-sm text-zinc-500">Supabase Auth с серверными ключами</p>
+                </ModalHeader>
+                <ModalBody className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant={authMode === "register" ? "solid" : "bordered"}
+                      color="secondary"
+                      onPress={() => setAuthMode("register")}
+                    >
+                      Регистрация
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={authMode === "login" ? "solid" : "bordered"}
+                      color="primary"
+                      onPress={() => setAuthMode("login")}
+                    >
+                      Вход
+                    </Button>
+                  </div>
+                  {authMode === "register" && (
+                    <Input
+                      label="Имя"
+                      placeholder="Как к вам обращаться"
+                      value={authName}
+                      onChange={(e) => setAuthName(e.target.value)}
+                    />
+                  )}
+                  <Input
+                    label="Email"
+                    placeholder="you@example.com"
+                    type="email"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                  />
+                  <Input
+                    label="Пароль"
+                    placeholder="Минимум 6 символов"
+                    type="password"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                  />
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-zinc-200">
+                    Все запросы идут на `/api/auth/{register|login}`; сервисный ключ хранится на сервере. После входа можно писать админку на REST `/rest/v1/*` с ключом service role.
+                  </div>
+                </ModalBody>
+                <ModalFooter>
+                  <Button variant="light" onPress={() => { setAuthStatus(null); setAuthError(null); onClose(); }}>
+                    Отмена
+                  </Button>
+                  <Button
+                    color="primary"
+                    onPress={() => {
+                      handleAuth();
+                      if (!isAuthPending) {
+                        setAuthOpen(true);
+                      }
+                    }}
+                    isDisabled={isAuthPending}
+                  >
+                    {isAuthPending ? "Отправляем..." : authMode === "register" ? "Создать аккаунт" : "Войти"}
+                  </Button>
+                </ModalFooter>
+                {authStatus && <p className="px-6 pb-2 text-sm font-semibold text-emerald-400">{authStatus}</p>}
+                {authError && <p className="px-6 pb-2 text-sm font-semibold text-rose-400">{authError}</p>}
+              </>
+            )}
+          </ModalContent>
+        </Modal>
       </main>
     </div>
   );

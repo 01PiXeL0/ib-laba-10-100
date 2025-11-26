@@ -40,7 +40,15 @@ export default function Header() {
           </Chip>
         </NavbarItem>
         <NavbarItem>
-          <Button as={Link} href="#account" color="primary" className="font-semibold shadow-md shadow-blue-500/30">
+          <Button
+            color="primary"
+            className="font-semibold shadow-md shadow-blue-500/30"
+            onPress={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("devbasics:open-auth"));
+              }
+            }}
+          >
             Войти / Регистрация
           </Button>
         </NavbarItem>
