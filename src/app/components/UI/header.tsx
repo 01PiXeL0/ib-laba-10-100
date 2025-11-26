@@ -1,13 +1,6 @@
 "use client";
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button, Chip } from "@heroui/react";
 
-const links = [
-  { label: "Рабочее место", href: "#workspace" },
-  { label: "Диалог", href: "#dialog" },
-  { label: "Скоринг", href: "#engine" },
-  { label: "Админ", href: "#data" },
-  { label: "Аккаунт", href: "#account" },
-];
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button, Chip } from "@heroui/react";
 
 const links = [
   { label: "Логика", href: "#flow" },
@@ -29,10 +22,8 @@ export default function Header() {
           <p className="text-2xl font-extrabold tracking-tight">DEVBASICS</p>
           <span className="text-xs uppercase text-zinc-500 dark:text-zinc-400">Career OS</span>
         </div>
-    <Navbar maxWidth="xl" className="bg-white/70 backdrop-blur dark:bg-black/50">
-      <NavbarBrand>
-        <p className="text-2xl font-bold tracking-tight">DEVBASICS</p>
       </NavbarBrand>
+
       <NavbarContent justify="center" className="hidden gap-4 sm:flex">
         {links.map((link) => (
           <NavbarItem key={link.href}>
@@ -42,12 +33,14 @@ export default function Header() {
           </NavbarItem>
         ))}
       </NavbarContent>
+
       <NavbarContent justify="end" className="gap-3">
         <NavbarItem className="hidden sm:flex">
           <Chip size="sm" color="primary" variant="flat" className="font-semibold uppercase tracking-wide">
             Live on Supabase
           </Chip>
         </NavbarItem>
+
         <NavbarItem>
           <Button
             color="primary"
@@ -59,10 +52,15 @@ export default function Header() {
             }}
           >
             Войти / Регистрация
+          </Button>
+        </NavbarItem>
+
+        <NavbarItem>
           <Link href="mailto:team@devbasics.ai" className="text-sm font-medium">
             Связаться
           </Link>
         </NavbarItem>
+
         <NavbarItem>
           <Button as={Link} href="#professions" color="primary" className="font-semibold">
             Смотреть прототип
