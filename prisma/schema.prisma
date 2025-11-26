@@ -14,6 +14,7 @@ model User {
   passwordHash String
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+
   assessments  Assessment[]
   chats        ChatSession[]
 }
@@ -22,6 +23,7 @@ model Assessment {
   id            Int       @id @default(autoincrement())
   user          User?     @relation(fields: [userId], references: [id])
   userId        Int?
+
   areas         String[]
   workFocus     String?
   workStyle     String?
@@ -34,17 +36,18 @@ model Assessment {
   snapshot      Json?
   createdAt     DateTime  @default(now())
 
-  chats         ChatSession[]   // ✅ ВАЖНО: обратная связь
+  chats         ChatSession[] @relation("AssessmentChats")
 }
 
-
 model ChatSession {
-  id         Int      @id @default(autoincrement())
-  user       User?    @relation(fields: [userId], references: [id])
-  userId     Int?
-  assessment Assessment? @relation(fields: [assessmentId], references: [id])
-  assessmentId Int?
-  transcript Json?
-  summary    String?
-  createdAt  DateTime @default(now())
+  id            Int       @id @default(autoincrement())
+  user          User?     @relation(fields: [userId], references: [id])
+  userId        Int?
+
+  assessment     Assessment? @relation("AssessmentChats", fields: [assessmentId], references: [id])
+  assessmentId  Int?
+
+  transcript    Json?
+  summary       String?
+  createdAt     DateTime  @default(now())
 }
