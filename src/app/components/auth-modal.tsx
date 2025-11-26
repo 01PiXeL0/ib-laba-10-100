@@ -6,12 +6,14 @@ import { useEffect, useState, useTransition } from "react";
 type AuthMode = "login" | "register";
 
 type Props = {
+  open: boolean;
+  mode: AuthMode;
+  onClose: () => void;
+  onModeChange: (mode: AuthMode) => void;
   onSuccess?: (data: { mode: AuthMode; user?: { id: number; email: string; name?: string | null } }) => void;
 };
 
-export default function AuthModal({ onSuccess }: Props) {
-  const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<AuthMode>("login");
+export default function AuthModal({ open, mode, onClose, onModeChange, onSuccess }: Props) {
   const [email, setEmail] = useState("demo@devbasics.ai");
   const [password, setPassword] = useState("demo1234");
   const [name, setName] = useState("Demo User");
@@ -20,13 +22,11 @@ export default function AuthModal({ onSuccess }: Props) {
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    const handler = (e: CustomEvent<{ mode?: AuthMode }>) => {
-      if (e.detail?.mode) setMode(e.detail.mode);
-      setOpen(true);
-    };
-    window.addEventListener("devbasics:auth", handler as EventListener);
-    return () => window.removeEventListener("devbasics:auth", handler as EventListener);
-  }, []);
+    if (!open) {
+      setStatus(null);
+      setError(null);
+    }
+  }, [open]);
 
   const handleSubmit = () => {
     setStatus(null);
@@ -49,9 +49,17 @@ export default function AuthModal({ onSuccess }: Props) {
   };
 
   return (
-    <Modal isOpen={open} onOpenChange={setOpen} size="lg" backdrop="blur" placement="center">
+    <Modal
+      isOpen={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose();
+      }}
+      size="lg"
+      backdrop="blur"
+      placement="center"
+    >
       <ModalContent>
-        {(onClose) => (
+        {(closeHandler) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
               {mode === "login" ? "Вход" : "Регистрация"}
@@ -60,7 +68,7 @@ export default function AuthModal({ onSuccess }: Props) {
             <ModalBody className="space-y-3">
               <Tabs
                 selectedKey={mode}
-                onSelectionChange={(key) => setMode(key as AuthMode)}
+                onSelectionChange={(key) => onModeChange(key as AuthMode)}
                 variant="bordered"
                 color="primary"
               >
@@ -92,7 +100,7 @@ export default function AuthModal({ onSuccess }: Props) {
               {error && <p className="text-sm font-semibold text-rose-400">{error}</p>}
             </ModalBody>
             <ModalFooter>
-              <Button variant="light" onPress={() => onClose()}>Закрыть</Button>
+              <Button variant="light" onPress={() => closeHandler()}>Закрыть</Button>
               <Button color="primary" onPress={handleSubmit} isDisabled={pending}>
                 {pending ? "Отправляем..." : mode === "login" ? "Войти" : "Создать"}
               </Button>

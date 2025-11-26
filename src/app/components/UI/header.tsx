@@ -8,7 +8,11 @@ const links = [
   { label: "Гайд", href: "#guide" },
 ];
 
-export default function Header() {
+type Props = {
+  onAuth: (mode?: "login" | "register") => void;
+};
+
+export default function Header({ onAuth }: Props) {
   return (
     <Navbar
       maxWidth="xl"
@@ -42,11 +46,7 @@ export default function Header() {
           <Button
             color="primary"
             className="font-semibold shadow-md shadow-blue-500/30"
-            onPress={() => {
-              if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("devbasics:auth", { detail: { mode: "login" } }));
-              }
-            }}
+            onPress={() => onAuth("login")}
           >
             Войти / Регистрация
           </Button>
