@@ -1,5 +1,5 @@
 "use client";
-import { Button, Card, CardBody, CardHeader, Checkbox, CheckboxGroup, Input, Radio, RadioGroup, Slider, Textarea } from "@heroui/react";
+import { Button, Card, CardBody, CardHeader, Input, Radio, RadioGroup, Slider, Textarea } from "@heroui/react";
 import { useMemo, useState, useTransition } from "react";
 
 const areas = ["IT / Data / AI", "Медицина", "Экономика", "Инжиниринг", "Креатив", "Образование", "Экология", "Новые роли"];
@@ -90,15 +90,33 @@ export default function AssessmentPage() {
               <Input label="Email" placeholder="user@mail.com" value={profile.email} onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))} />
               <Input label="Уровень" placeholder="Студент / Middle / Senior" value={profile.level} onChange={(e) => setProfile((p) => ({ ...p, level: e.target.value }))} />
             </div>
-            <CheckboxGroup label="Области" value={selectedAreas} onChange={(value) => setSelectedAreas(value as string[])}>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-zinc-200">Области</p>
               <div className="grid gap-2 sm:grid-cols-2">
-                {areas.map((area) => (
-                  <Checkbox key={area} value={area}>
-                    {area}
-                  </Checkbox>
-                ))}
+                {areas.map((area) => {
+                  const checked = selectedAreas.includes(area);
+                  return (
+                    <label
+                      key={area}
+                      className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm hover:border-white/20"
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-5 w-5 rounded border-slate-500 bg-slate-900 text-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                        checked={checked}
+                        onChange={(e) => {
+                          setSelectedAreas((prev) => {
+                            if (e.target.checked) return [...prev, area];
+                            return prev.filter((item) => item !== area);
+                          });
+                        }}
+                      />
+                      <span className="text-zinc-100">{area}</span>
+                    </label>
+                  );
+                })}
               </div>
-            </CheckboxGroup>
+            </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <RadioGroup label="Фокус" value={workFocus} onValueChange={setWorkFocus} orientation="vertical">
                 <Radio value="данные">Данные</Radio>
@@ -154,7 +172,11 @@ export default function AssessmentPage() {
               <Button color="primary" onPress={handleSubmit} isDisabled={pending}>
                 {pending ? "Сохраняем..." : "Сохранить оценку"}
               </Button>
-              <Button variant="bordered" color="secondary" onPress={() => window.dispatchEvent(new CustomEvent("devbasics:auth"))}>
+              <Button
+                variant="bordered"
+                color="secondary"
+                onPress={() => window.dispatchEvent(new CustomEvent("devbasics:auth", { detail: { mode: "login" } }))}
+              >
                 Войти перед отправкой
               </Button>
             </div>
