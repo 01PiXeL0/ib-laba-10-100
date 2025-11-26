@@ -908,7 +908,6 @@ export default function Home() {
           </ModalContent>
         </Modal>
       </main>
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
       <div className="relative isolate overflow-hidden bg-gradient-to-b from-white via-white/70 to-zinc-100 dark:from-black dark:via-zinc-900 dark:to-black">
         <div className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-18rem]">
           <div
@@ -1140,7 +1139,5 @@ export default function Home() {
             </div>
           </section>
         </main>
-      </div>
-    </div>
   );
 }
