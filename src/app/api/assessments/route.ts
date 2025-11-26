@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 type AssessmentPayload = {
@@ -16,7 +17,7 @@ type AssessmentPayload = {
     learningPlan?: string[];
     freeText?: string;
   };
-  featureSnapshot?: Record<string, unknown>;
+  featureSnapshot?: Prisma.InputJsonValue | null;
 };
 
 export async function POST(request: Request) {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
         skills: body.motivations?.skills,
         learningPlan: body.motivations?.learningPlan,
         freeText: body.motivations?.freeText,
-        snapshot: body.featureSnapshot,
+        snapshot: body.featureSnapshot ?? undefined,
       },
       select: {
         id: true,
