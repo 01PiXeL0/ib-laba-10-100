@@ -9,6 +9,12 @@ const links = [
   { label: "Аккаунт", href: "#account" },
 ];
 
+const links = [
+  { label: "Логика", href: "#flow" },
+  { label: "Рекомендации", href: "#professions" },
+  { label: "Админ", href: "#admin" },
+];
+
 export default function Header() {
   return (
     <Navbar
@@ -23,6 +29,9 @@ export default function Header() {
           <p className="text-2xl font-extrabold tracking-tight">DEVBASICS</p>
           <span className="text-xs uppercase text-zinc-500 dark:text-zinc-400">Career OS</span>
         </div>
+    <Navbar maxWidth="xl" className="bg-white/70 backdrop-blur dark:bg-black/50">
+      <NavbarBrand>
+        <p className="text-2xl font-bold tracking-tight">DEVBASICS</p>
       </NavbarBrand>
       <NavbarContent justify="center" className="hidden gap-4 sm:flex">
         {links.map((link) => (
@@ -50,6 +59,13 @@ export default function Header() {
             }}
           >
             Войти / Регистрация
+          <Link href="mailto:team@devbasics.ai" className="text-sm font-medium">
+            Связаться
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Button as={Link} href="#professions" color="primary" className="font-semibold">
+            Смотреть прототип
           </Button>
         </NavbarItem>
       </NavbarContent>
