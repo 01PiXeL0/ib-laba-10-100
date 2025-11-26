@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DEVBASICS Career OS
 
-## Getting Started
+Готовый продукт на Next.js (App Router) с Prisma и PostgreSQL: модальный вход, отдельная страница теста и отдельный чат с ИИ. Все данные уходят в базу через Prisma Client.
 
-First, run the development server:
+## Возможности
+- Разделение по этапам: / (лендинг с CTA) → /assessment (тест) → /chat (диалог).
+- Модальное окно входа/регистрации (email + пароль), хэш через scrypt без внешних пакетов.
+- API-роуты для аутентификации, сохранения оценок и чатов (`/api/auth/register`, `/api/auth/login`, `/api/assessments`, `/api/chat`).
+- Prisma-схема с таблицами User, Assessment, ChatSession; Postgres рекомендуем как основную БД.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Быстрый старт
+1. **Установите зависимости**
+   ```bash
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Создайте `.env.local`** (пример):
+   ```bash
+   cp .env.local.example .env.local
+   # DATABASE_URL="postgresql://user:password@localhost:5432/devbasics?schema=public"
+   ```
+   Подходит любой PostgreSQL (Neon, Railway, Render, локальный). Для SQLite поменяйте провайдер в `prisma/schema.prisma`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Примените Prisma-схему**
+   ```bash
+   npx prisma db push
+   # или
+   npx prisma migrate dev --name init
+   ```
+   Таблицы: `User`, `Assessment`, `ChatSession`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Запустите dev-сервер**
+   ```bash
+   npm run dev
+   ```
+   Страницы: `/` (лендинг и CTA), `/assessment` (тест), `/chat` (чат). Кнопка «Войти/Регистрация» открывает модалку на любой странице.
 
-## Learn More
+## API
+- `POST /api/auth/register` — `{ email, password, name? }` → создаёт пользователя, пароль хэшируется scrypt.
+- `POST /api/auth/login` — `{ email, password }` → проверка пароля, возврат профиля.
+- `POST /api/assessments` — `{ screening, motivations, featureSnapshot, userId? }` → запись в Assessment.
+- `POST /api/chat` — `{ transcript: [{role, content}], assessmentId?, userId?, summary? }` → запись в ChatSession.
 
-To learn more about Next.js, take a look at the following resources:
+## Примечания по базе
+- По умолчанию используется PostgreSQL. Если нужен SQLite для локальных тестов, смените `provider` и строку подключения в `prisma/schema.prisma`.
+- Для продакшена рекомендуем управляемый Postgres (Neon/Railway/Render). Prisma Client работает на Vercel/Netlify без доп. настроек.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Линтинг и тесты
+- `npm run lint` — проверка кода.
