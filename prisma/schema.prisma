@@ -33,7 +33,10 @@ model Assessment {
   freeText      String?
   snapshot      Json?
   createdAt     DateTime  @default(now())
+
+  chats         ChatSession[]   // ✅ ВАЖНО: обратная связь
 }
+
 
 model ChatSession {
   id         Int      @id @default(autoincrement())
