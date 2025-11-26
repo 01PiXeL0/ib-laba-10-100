@@ -1,25 +1,33 @@
+import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { verifyPassword } from "../register/route";
 
-import { loginUser } from "@/lib/supabaseClient";
-
-type LoginPayload = {
-  email: string;
-  password: string;
+type Body = {
+  email?: string;
+  password?: string;
 };
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = (await request.json()) as LoginPayload;
-
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email и пароль обязательны" }, { status: 400 });
+    const body = (await request.json()) as Body;
+    if (!body.email || !body.password) {
+      return NextResponse.json({ error: "Нужны email и пароль" }, { status: 400 });
     }
 
-    const data = await loginUser(email, password);
+    const user = await prisma.user.findUnique({ where: { email: body.email } });
+    if (!user) {
+      return NextResponse.json({ error: "Пользователь не найден" }, { status: 404 });
+    }
 
-    return NextResponse.json({ message: "Успешный вход", data });
+    const valid = verifyPassword(body.password, user.passwordHash);
+    if (!valid) {
+      return NextResponse.json({ error: "Неверный пароль" }, { status: 401 });
+    }
+
+    const profile = { id: user.id, email: user.email, name: user.name };
+    return NextResponse.json({ message: "Вход выполнен", user: profile });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 }

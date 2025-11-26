@@ -2,18 +2,17 @@
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button, Chip } from "@heroui/react";
 
 const links = [
-  { label: "Рабочее место", href: "#workspace" },
-  { label: "Диалог", href: "#dialog" },
-  { label: "Скоринг", href: "#engine" },
-  { label: "Админ", href: "#data" },
-  { label: "Аккаунт", href: "#account" },
+  { label: "Главная", href: "/" },
+  { label: "Тест", href: "/assessment" },
+  { label: "Чат", href: "/chat" },
+  { label: "Гайд", href: "#guide" },
 ];
 
 export default function Header() {
   return (
     <Navbar
       maxWidth="xl"
-      className="border-b border-white/10 bg-gradient-to-r from-white/70 via-white/50 to-white/30 backdrop-blur dark:from-black/80 dark:via-black/60 dark:to-black/50"
+      className="border-b border-white/10 bg-gradient-to-r from-slate-950/90 via-slate-900/80 to-slate-900/60 backdrop-blur"
     >
       <NavbarBrand className="gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 text-lg font-bold text-white shadow-lg shadow-indigo-500/30">
@@ -36,7 +35,7 @@ export default function Header() {
       <NavbarContent justify="end" className="gap-3">
         <NavbarItem className="hidden sm:flex">
           <Chip size="sm" color="primary" variant="flat" className="font-semibold uppercase tracking-wide">
-            Live on Supabase
+            Prisma + Postgres
           </Chip>
         </NavbarItem>
         <NavbarItem>
@@ -45,7 +44,7 @@ export default function Header() {
             className="font-semibold shadow-md shadow-blue-500/30"
             onPress={() => {
               if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("devbasics:open-auth"));
+                window.dispatchEvent(new CustomEvent("devbasics:auth", { detail: { mode: "login" } }));
               }
             }}
           >
